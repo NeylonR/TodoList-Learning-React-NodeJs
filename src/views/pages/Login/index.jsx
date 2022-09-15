@@ -1,28 +1,29 @@
 import Form from "../../components/Form";
 
 export default function Login() {
+    const formArr = [
+        {
+            label: "Email",
+            name: "email",
+            type: "email", 
+            placeholder: "Type your email"
+        },
+        {
+            label: "Password",
+            name: "password",
+            type: "password", 
+            placeholder: "Type your password"
+        },
+    ];
+
     return (
         <section>
             <Form 
-            action="POST" 
-            target="localhost:4200/login"
+            url={'http://localhost:4200/api/auth/login'}
             title="Login"
             submitBtn="Login"
-            // onSubmit={}
-            formArr= {[
-                {
-                    label: "Email",
-                    name: "email",
-                    type: "email", 
-                    placeholder: "Type your email"
-                },
-                {
-                    label: "Password",
-                    name: "password",
-                    type: "password", 
-                    placeholder: "Type your password"
-                },
-            ]}
+            formArr= {formArr}
+            errorMessage="Wrong email or/and password."
             />
         </section>
     )

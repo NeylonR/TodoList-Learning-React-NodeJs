@@ -28,10 +28,16 @@ export const InputStyle = styled.input`
     border-radius: 7px;
     margin-bottom: 1em;
     &:last-of-type{
-        margin-bottom: 2em;
+        margin-bottom: 1.5em;
     }
 `;
 
 export const InputContainerStyle = styled.div`
     ${flex({direction:'column'})};
+`;
+
+export const ErrorMessageStyle = styled.p`
+    color: #B25068;
+    font-weight: 600;
+    margin-bottom: 1em;
 `;
