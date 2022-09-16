@@ -2,9 +2,11 @@ import { FormStyle, FormTitleStyle, InputStyle, LabelStyle, InputContainerStyle 
 import { Button } from "../../../utils/style/GlobalStyle";
 import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import useAuth from "../../../utils/hooks/useAuth";
 
-export default function Form({ url, title, formArr, submitBtn, errorMessage }) {
+export default function Form({ url, title, formArr, submitBtn, errorMessage, formLogin }) {
     //make an object with each key being the name of the input with an empty string as its value
     const prepareForm = (formArr) => {
         return formArr.reduce((r, v) => ({ ...r, [v.name]: "" }), {});
@@ -15,16 +17,20 @@ export default function Form({ url, title, formArr, submitBtn, errorMessage }) {
     const [formErrors, setFormErrors] = useState({});
     const [error, setError] = useState(false);
     const [isSubmit, setIsSubmit] = useState(false);
+    const { setAuth } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from?.pathname || "/";
 
-    //take previous state as argument so we can destructure it to change the correct key of the form with the actual input's value
+    //desctructure previous state and use it to change the correct key of the form with the actual input's value
     const onChangeHandler = (e) => setForm((prevState) => ({ ...prevState, [e.target.name]: e.target.value}));
 
     const validate = (values) => {
         const errors = {};
-        const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+        const regexEmail = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
         if(!values.email) {
             errors.email = "Email is required."
-        } else if(!regex.test(values.email)){
+        } else if(!regexEmail.test(values.email)){
             errors.email = "Invalid email format.";
         }
         if(!values.password) {
@@ -40,20 +46,16 @@ export default function Form({ url, title, formArr, submitBtn, errorMessage }) {
         setFormErrors(validate(form));
         setIsSubmit(true);
     };
-    // const cleanEmailValue = () => {
-    //     return setForm({
-    //         ...form,
-    //         email: form.email.replace(/[^\w@.]/g, '')
-    //     })
-        
-    // }
 
     useEffect(() => {
         if (Object.keys(formErrors).length === 0 && isSubmit) {
             axios.post(url, {...form})
             .then(res => {
-                console.log(res);
-                console.log(res.data);
+                console.log(JSON.stringify(res));
+                console.log(res.data.token);
+                if(formLogin){ setAuth({...form, token : res.data.token});};
+                setForm(initialForm);
+                navigate(from, { replace: true});
             })
             .catch(error => {
                 console.error(error)
@@ -74,14 +76,16 @@ export default function Form({ url, title, formArr, submitBtn, errorMessage }) {
             <FormTitleStyle>{title}</FormTitleStyle>
             {formArr.map(({label, name, type, placeholder}, index) => (
                 <InputContainerStyle key={label + index}>
-                    <LabelStyle>{label}</LabelStyle>
+                    <LabelStyle htmlFor={name} >{label}</LabelStyle>
                     <InputStyle 
+                        id={name}
                         type={type} 
                         name={name} 
                         placeholder={placeholder} 
+                        autoComplete="off"
                         value={form[name]} 
                         onChange={(e)=>onChangeHandler(e)} 
-                        required={false}
+                        required={true}
                     />
                     {formErrors[name] && <ErrorMessageStyle>{formErrors[name]}</ErrorMessageStyle>}
                 </InputContainerStyle>
@@ -110,6 +114,7 @@ Form.defaultProps = {
     ],
     submitBtn: "Create account",
     errorMessage: "Error.",
+    formLogin: false
 };
 
 Form.propTypes = {

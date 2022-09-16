@@ -18,6 +18,15 @@ const HeaderStyle = styled.header`
         a{
             color:white;
         }
+        button{
+            color: white;
+            background-color: transparent;
+            border:none;
+            outlet:none;
+            font-family:"trebuchet ms";
+            font-size:16px;
+            cursor:pointer;
+        }
 
         // White line under button when hover
         li{

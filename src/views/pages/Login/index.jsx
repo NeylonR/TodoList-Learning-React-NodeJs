@@ -24,6 +24,7 @@ export default function Login() {
             submitBtn="Login"
             formArr= {formArr}
             errorMessage="Wrong email or/and password."
+            formLogin={true}
             />
         </section>
     )
