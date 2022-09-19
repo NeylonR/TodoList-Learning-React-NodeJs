@@ -37,7 +37,7 @@ export const InputContainerStyle = styled.div`
 `;
 
 export const ErrorMessageStyle = styled.p`
-    color: #B25068;
+    color: ${colors.error};
     font-weight: 600;
     margin-bottom: 1em;
 `;

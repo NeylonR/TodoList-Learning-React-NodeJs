@@ -25,7 +25,7 @@ export const StyledGlobalStyle = createGlobalStyle`
 `;
 
 export const Button = styled.button`
-    padding: .8em 1em;
+    padding: .4em .7em;
     border-radius: 7px;
     border: 1px solid white;
     background-color: ${colors.fourth};
