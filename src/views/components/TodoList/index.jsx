@@ -17,19 +17,21 @@ export default function TodoList({userList}) {
     };
     const [listValues, setListValues] = useState(initialForm);
     const [titleIsModify, setTitleIsModify] = useState(false);
-    const [inputIsModify, setInputIsModify] = useState(listValues.task);
-    console.log(titleIsModify)
+
+    // console.log(...listValues.task)
+
+    const uid = crypto.randomUUID();
 
     const onTitleChangeHandler = (e) => {
         setListValues({...listValues, title: e.target.value});
     };
 
-    const onInputChangeHandler = (e, taskId) => {
-        const taskInputModify = inputIsModify.map((task) => 
-            task.id === taskId ? { ...task, text: e.target.value } : task
-        )
-        setListValues(taskInputModify)
-    }
+    const onTaskChangeHandler = (e, taskId) => {
+        setListValues({...listValues, 
+        task : listValues.task.map((task) => 
+            task.id === taskId ? { ...task, text: e.target.value} : task
+        )})
+    };
     
     const addInputOnClick = () => {
         const taskLength = listValues.task.length;
@@ -37,15 +39,13 @@ export default function TodoList({userList}) {
             {...listValues, 
             task : [
                 ...listValues.task,
-                {id: taskLength+1,text:"new test", isDone: false}
+                {id: uid,text:"new test", isDone: false}
             ]
         })
-        // console.log(listValues)
     };
 
     const deleteInputOnClick = (taskId) => {
         const filteredList = listValues.task.filter(task => task.id !== taskId);
-        // console.log(filteredList)
         setListValues({...listValues, task : [...filteredList]});
     };
 
@@ -53,7 +53,6 @@ export default function TodoList({userList}) {
         const taskIsDone = listValues.task.filter((task) => {
             if(task.id === taskId) return task;
         });
-        // console.log(taskIsDone)
         setListValues({...listValues, 
         task : listValues.task.map((task) => 
             task.id === taskId ? { ...task, isDone: !taskIsDone[0].isDone} : task
@@ -61,34 +60,55 @@ export default function TodoList({userList}) {
     };
 
     const modifyInputOnClick = (taskId) => {
-        const taskInputModify = inputIsModify.map((task) => 
-            task.id === taskId ? { ...task, modify:true } : {...task, modify:false}
+        const taskModifyState = listValues.task.map((task) => {
+                if(taskId === false) return {...task, modify:false};
+                return task.id === taskId ? { ...task, modify:true } : {...task, modify:false}
+            }
         )
-        setInputIsModify(taskInputModify)
+        setListValues({...listValues, task : [...taskModifyState]});   
     };
+
+    const removeModifyKey = () => {
+        const taskModifyState = listValues.task.map((task) => {
+            //remove the "modify" key
+            const { ["modify"]: unused, ...objRest } = task;
+            return objRest;
+        }
+    )
+    setListValues({...listValues, task : [...taskModifyState]}); 
+    }
 
     return (
         <TodoForm onSubmit={(e)=>e.preventDefault()}>
+            {/* <p onClick={removeModifyKey} >pll</p>
+            <pre>{JSON.stringify(listValues.task)}</pre> */}
             {!listValues?.title || titleIsModify ? (
-                <TodoContainer>
+                <TodoContainer onSubmit={(e)=>{
+                    e.preventDefault();
+                    setTitleIsModify(false)}
+                }>
                 <TodoInput type="text" name="title" id="title" placeholder="Title" value ={listValues.title} onChange={(e) => onTitleChangeHandler(e)}/>
                 <FontAwesomeIcon icon="check" onClick={() => setTitleIsModify(false)}/>
                 </TodoContainer>
                 
             ) : (
-                <TodoContainer>
+                <TodoContainer onSubmit={(e)=>e.preventDefault()}>
                 <h2 >{listValues.title}</h2>
                 <FontAwesomeIcon icon="wrench" onClick={() => setTitleIsModify(true)}/>
                 </TodoContainer>
             )}
-            {inputIsModify.length > 0 ? (
-                inputIsModify.map((task, index) => {
+            {listValues?.task.length > 0 ? (
+                listValues.task.map((task, index) => {
                     return task?.modify === true ? (
                         (
-                            <TodoContainer key={task.text + task.id + index}>
-                                <TodoInput type="text" name={task.id + index} id={task.id + index} placeholder="Todo text" value={task.text} onChange={(e) => onInputChangeHandler(e, task.id)}/>
+                            <TodoContainer key={task.text + task.id + index} onSubmit={(e)=>{
+                                e.preventDefault();
+                                modifyInputOnClick(false);
+                                }
+                            }>
+                                <TodoInput type="text" name={task.id + index} id={task.id + index} placeholder="Todo text" value ={task.text} onChange={(e) => onTaskChangeHandler(e, task.id)}/>
                                 <div>
-                                    <FontAwesomeIcon icon="check"/>
+                                    <FontAwesomeIcon icon="check" onClick={()=>modifyInputOnClick(false)}/>
                                 </div>
                             </TodoContainer>
                         

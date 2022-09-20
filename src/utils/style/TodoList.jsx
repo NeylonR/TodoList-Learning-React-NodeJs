@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { flex } from './mixins';
 import colors from './colors';
 
-export const TodoForm = styled.form`
+export const TodoForm = styled.div`
     padding: 3em;
     background-color: ${colors.third};
     max-width:400px;
@@ -24,7 +24,7 @@ export const TodoForm = styled.form`
     }
 `;
 
-export const TodoContainer = styled.div`
+export const TodoContainer = styled.form`
     width:100%;
     ${flex({just: "space-between"})};
     gap:.2em;
