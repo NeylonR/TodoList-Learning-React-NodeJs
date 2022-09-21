@@ -2,10 +2,10 @@ import styled from 'styled-components';
 import { flex } from './mixins';
 import colors from './colors';
 
-export const TodoForm = styled.div`
+export const TodoListArticle = styled.article`
     padding: 3em;
     background-color: ${colors.third};
-    max-width:400px;
+    width:400px;
     margin: 0 auto;
     border-radius: 7px;
     box-shadow: 2px 2px 3px 1px ${colors.third};
@@ -24,9 +24,29 @@ export const TodoForm = styled.div`
     }
 `;
 
-export const TodoContainer = styled.form`
+export const TodoForm = styled.form`
     width:100%;
     ${flex({just: "space-between"})};
+    gap:.2em;
+    padding: .2em;
+    border-radius: 7px;
+    border:  ${({isDone}) => (isDone ? 'solid 2px green' : 'solid 2px transparent')};
+    border-top: none;
+    div{
+        ${flex({})};
+        gap:.3em;
+    }
+    p{
+        text-decoration-line: ${({isDone}) => (isDone ? 'line-through' : 'none')};
+        width: 100%;
+        text-align:start;
+    }
+`;
+
+export const TodoDiv = styled.div`
+    width:100%;
+    ${flex({just: "space-between"})};
+    flex-wrap:wrap;
     gap:.2em;
     padding: .2em;
     border-radius: 7px;

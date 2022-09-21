@@ -1,24 +1,25 @@
-import { TodoForm, TodoInput, TodoContainer } from "../../../utils/style/TodoList";
+import { TodoListArticle, TodoInput, TodoForm, TodoDiv } from "../../../utils/style/TodoList";
 import { Button } from "../../../utils/style/GlobalStyle";
 import { useState, useEffect } from "react";
+import axios from "axios";
+import useAuth from "../../../utils/hooks/useAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faTrash, faCheck, faWrench } from '@fortawesome/free-solid-svg-icons'
 library.add(faTrash, faCheck, faWrench);
 
 export default function TodoList({userList}) {
-    const initialForm = userList ? userList : { 
-        title: 'd', 
+    const initialForm = userList ? userList : {
+        title: '', 
         task: [
-            { id: 0, text: 'd', isDone: false},
-            { id: 1, text : "deed", isDone: false},
-            { id: 2, text : "3", isDone: false}
         ]
     };
     const [listValues, setListValues] = useState(initialForm);
     const [titleIsModify, setTitleIsModify] = useState(false);
+    const { auth } = useAuth();
 
     // console.log(...listValues.task)
+    // console.log(JSON.parse(listValues.task[0]))
 
     const uid = crypto.randomUUID();
 
@@ -34,7 +35,6 @@ export default function TodoList({userList}) {
     };
     
     const addInputOnClick = () => {
-        const taskLength = listValues.task.length;
         setListValues(
             {...listValues, 
             task : [
@@ -59,12 +59,17 @@ export default function TodoList({userList}) {
         )})
     };
 
-    const modifyInputOnClick = (taskId) => {
+    const modifyInputOnClick = (taskId, confirm) => {
+        const hasOneEmptyText = listValues.task.map((task) => (
+            task.text.toString().length <= 0 ? true : task
+        ));
+
         const taskModifyState = listValues.task.map((task) => {
-                if(taskId === false) return {...task, modify:false};
-                return task.id === taskId ? { ...task, modify:true } : {...task, modify:false}
-            }
-        )
+            if(hasOneEmptyText.includes(true)) return task;
+            if(confirm) return {...task, modify:false};
+            return task.id === taskId ? { ...task, modify:true } : {...task, modify:false}
+        });
+
         setListValues({...listValues, task : [...taskModifyState]});   
     };
 
@@ -78,62 +83,73 @@ export default function TodoList({userList}) {
     setListValues({...listValues, task : [...taskModifyState]}); 
     }
 
+    const saveList = async() => {
+        axios.post(`http://localhost:4200/api/todolist/create`, {...listValues}, { headers:{"Authorization" : `Bearer ${auth.token}`}})
+            .then(res => {
+                console.log(JSON.stringify(res))
+            })
+            .catch(error => {
+                console.error(error)
+            })
+    };
+
     return (
-        <TodoForm onSubmit={(e)=>e.preventDefault()}>
+        <TodoListArticle onSubmit={(e)=>e.preventDefault()}>
             {/* <p onClick={removeModifyKey} >pll</p>
             <pre>{JSON.stringify(listValues.task)}</pre> */}
             {!listValues?.title || titleIsModify ? (
-                <TodoContainer onSubmit={(e)=>{
+                <TodoForm onSubmit={(e)=>{
                     e.preventDefault();
                     setTitleIsModify(false)}
                 }>
-                <TodoInput type="text" name="title" id="title" placeholder="Title" value ={listValues.title} onChange={(e) => onTitleChangeHandler(e)}/>
+                <TodoInput type="text" name="title" id="title" placeholder="Title" value={listValues.title} onChange={(e) => onTitleChangeHandler(e)}/>
                 <FontAwesomeIcon icon="check" onClick={() => setTitleIsModify(false)}/>
-                </TodoContainer>
+                </TodoForm>
                 
             ) : (
-                <TodoContainer onSubmit={(e)=>e.preventDefault()}>
+                <TodoDiv onSubmit={(e)=>e.preventDefault()}>
                 <h2 >{listValues.title}</h2>
                 <FontAwesomeIcon icon="wrench" onClick={() => setTitleIsModify(true)}/>
-                </TodoContainer>
+                </TodoDiv>
             )}
             {listValues?.task.length > 0 ? (
                 listValues.task.map((task, index) => {
                     return task?.modify === true ? (
                         (
-                            <TodoContainer key={task.text + task.id + index} onSubmit={(e)=>{
+                            <TodoForm key={task.id + index} onSubmit={(e)=>{
                                 e.preventDefault();
-                                modifyInputOnClick(false);
+                                modifyInputOnClick(task.id, true);
                                 }
                             }>
-                                <TodoInput type="text" name={task.id + index} id={task.id + index} placeholder="Todo text" value ={task.text} onChange={(e) => onTaskChangeHandler(e, task.id)}/>
+                                <TodoInput type="text" name={task.id + index} id={task.id + index} placeholder="Todo text" value={task.text} onChange={(e) => onTaskChangeHandler(e, task.id, index)}/>
                                 <div>
-                                    <FontAwesomeIcon icon="check" onClick={()=>modifyInputOnClick(false)}/>
+                                    <FontAwesomeIcon icon="check" onClick={()=>modifyInputOnClick(task.id, true)}/>
                                 </div>
-                            </TodoContainer>
+                            </TodoForm>
                         
                         )
                     ) : (
-                        <TodoContainer key={task.text + task.id + index} isDone={task.isDone}>
-                            <p onClick={()=>modifyInputOnClick(task.id)}>{task.text} {task.id}</p>
+                        <TodoForm key={task.id + index} isDone={task.isDone}>
+                            <p onClick={()=>modifyInputOnClick(task.id)}>{task.text}</p>
                             <div>
                                 <FontAwesomeIcon icon="check" onClick={()=>taskIsDoneOnClick(task.id)}/>
                                 <FontAwesomeIcon icon="trash" onClick={()=>deleteInputOnClick(task.id)}/>
                             </div>
-                        </TodoContainer>
+                        </TodoForm>
                     )
                 })
             ) : (
-                <TodoContainer>
+                <TodoForm>
                     <TodoInput type="text" name="list-1" id="list-1" placeholder="Todo text" />
                     <div>
                         <FontAwesomeIcon icon="check"/>
                         <FontAwesomeIcon icon="trash"/>
                     </div>
-                </TodoContainer>
+                </TodoForm>
             )}
             
             <Button onClick={addInputOnClick}>Add a task</Button>
-        </TodoForm>
+            <Button onClick={saveList}>Save my list</Button>
+        </TodoListArticle>
     )
 }

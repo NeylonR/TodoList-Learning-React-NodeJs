@@ -36,6 +36,7 @@ exports.login = async (req, res) => {
             {
                 "UserInfo": {
                     "email": foundUser.email,
+                    "userId": foundUser._id,
                 }
             },
             'RANDOM_TOKEN_SECRET',
