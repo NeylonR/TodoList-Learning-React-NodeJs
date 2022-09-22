@@ -1,6 +1,6 @@
 import { TodoListArticle, TodoInput, TodoForm, TodoDiv } from "../../../utils/style/TodoList";
 import { Button } from "../../../utils/style/GlobalStyle";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import useAuth from "../../../utils/hooks/useAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,29 +8,30 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { faTrash, faCheck, faWrench } from '@fortawesome/free-solid-svg-icons'
 library.add(faTrash, faCheck, faWrench);
 
-export default function TodoList({userList}) {
+export default function TodoList({userList, deleteTodoList}) {
     const initialForm = userList ? userList : {
         title: '', 
-        task: [
-        ]
+        task: []
     };
     const [listValues, setListValues] = useState(initialForm);
     const [titleIsModify, setTitleIsModify] = useState(false);
     const { auth } = useAuth();
-
-    // console.log(...listValues.task)
-    // console.log(JSON.parse(listValues.task[0]))
-
     const uid = crypto.randomUUID();
+    const [errored, setErrored] = useState("");
 
     const onTitleChangeHandler = (e) => {
         setListValues({...listValues, title: e.target.value});
     };
 
+    const titleValidate = (title) => {
+        if(title.length < 4 || title.length > 40) return;
+        setTitleIsModify(false);
+    };
+
     const onTaskChangeHandler = (e, taskId) => {
         setListValues({...listValues, 
         task : listValues.task.map((task) => 
-            task.id === taskId ? { ...task, text: e.target.value} : task
+            task.id === taskId ? { ...task, text: e.target.value, isNew: false } : task
         )})
     };
     
@@ -39,7 +40,7 @@ export default function TodoList({userList}) {
             {...listValues, 
             task : [
                 ...listValues.task,
-                {id: uid,text:"new test", isDone: false}
+                {id: uid,text:"", isDone: false, isNew: true}
             ]
         })
     };
@@ -61,7 +62,7 @@ export default function TodoList({userList}) {
 
     const modifyInputOnClick = (taskId, confirm) => {
         const hasOneEmptyText = listValues.task.map((task) => (
-            task.text.toString().length <= 0 ? true : task
+            task?.text?.toString().length <= 0 ? true : task
         ));
 
         const taskModifyState = listValues.task.map((task) => {
@@ -73,37 +74,46 @@ export default function TodoList({userList}) {
         setListValues({...listValues, task : [...taskModifyState]});   
     };
 
-    const removeModifyKey = () => {
-        const taskModifyState = listValues.task.map((task) => {
-            //remove the "modify" key
-            const { ["modify"]: unused, ...objRest } = task;
-            return objRest;
-        }
-    )
-    setListValues({...listValues, task : [...taskModifyState]}); 
-    }
+    // const removeModifyKey = () => {
+    //     const taskModifyState = listValues.task.map((task) => {
+    //         //remove the "modify" key
+    //         const { ["modify"]: unused, ...objRest } = task;
+    //         return objRest;
+    //     }
+    // )
+    // setListValues({...listValues, task : [...taskModifyState]}); 
+    // }
 
     const saveList = async() => {
-        axios.post(`http://localhost:4200/api/todolist/create`, {...listValues}, { headers:{"Authorization" : `Bearer ${auth.token}`}})
-            .then(res => {
-                console.log(JSON.stringify(res))
-            })
-            .catch(error => {
-                console.error(error)
-            })
+        try {
+            await axios.put(`http://localhost:4200/api/todolist/${listValues._id}`, {...listValues}, { headers:{"Authorization" : `Bearer ${auth.token}`}})
+            setErrored('');
+        } catch (error) {
+            console.error(error)
+            setErrored(error.response.data.message);
+        }
     };
 
     return (
         <TodoListArticle onSubmit={(e)=>e.preventDefault()}>
-            {/* <p onClick={removeModifyKey} >pll</p>
-            <pre>{JSON.stringify(listValues.task)}</pre> */}
+            {errored.length > 1 && <p>{errored}</p>}
+            <FontAwesomeIcon icon="trash" onClick={deleteTodoList}/>
             {!listValues?.title || titleIsModify ? (
                 <TodoForm onSubmit={(e)=>{
                     e.preventDefault();
-                    setTitleIsModify(false)}
+                    titleValidate(listValues.title)}
                 }>
-                <TodoInput type="text" name="title" id="title" placeholder="Title" value={listValues.title} onChange={(e) => onTitleChangeHandler(e)}/>
-                <FontAwesomeIcon icon="check" onClick={() => setTitleIsModify(false)}/>
+                <TodoInput 
+                    autoFocus
+                    type="text" 
+                    name="title" 
+                    id="title" 
+                    placeholder="Title" 
+                    value={listValues.title} onChange={
+                        (e) => onTitleChangeHandler(e)
+                        }
+                />
+                <FontAwesomeIcon icon="check" onClick={() => titleValidate(listValues.title)}/>
                 </TodoForm>
                 
             ) : (
@@ -112,16 +122,24 @@ export default function TodoList({userList}) {
                 <FontAwesomeIcon icon="wrench" onClick={() => setTitleIsModify(true)}/>
                 </TodoDiv>
             )}
-            {listValues?.task.length > 0 ? (
+            {listValues?.task ? (
                 listValues.task.map((task, index) => {
-                    return task?.modify === true ? (
+                    return task?.modify === true || task?.isNew === true ? (
                         (
                             <TodoForm key={task.id + index} onSubmit={(e)=>{
                                 e.preventDefault();
                                 modifyInputOnClick(task.id, true);
                                 }
                             }>
-                                <TodoInput type="text" name={task.id + index} id={task.id + index} placeholder="Todo text" value={task.text} onChange={(e) => onTaskChangeHandler(e, task.id, index)}/>
+                                <TodoInput 
+                                    autoFocus
+                                    type="text" 
+                                    name={task.id + index} 
+                                    id={task.id + index} 
+                                    placeholder="Todo text" 
+                                    value={task.text} 
+                                    onChange={(e) => onTaskChangeHandler(e, task.id, index)}
+                                />
                                 <div>
                                     <FontAwesomeIcon icon="check" onClick={()=>modifyInputOnClick(task.id, true)}/>
                                 </div>
@@ -149,7 +167,7 @@ export default function TodoList({userList}) {
             )}
             
             <Button onClick={addInputOnClick}>Add a task</Button>
-            <Button onClick={saveList}>Save my list</Button>
+            <Button onClick={saveList}>Save</Button>
         </TodoListArticle>
     )
 }

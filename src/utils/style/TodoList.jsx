@@ -11,6 +11,7 @@ export const TodoListArticle = styled.article`
     box-shadow: 2px 2px 3px 1px ${colors.third};
     ${flex({direction:"column"})};
     gap:1em;
+    word-break:break-word;
     svg{
         width:16px;
         height:19px;

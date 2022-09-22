@@ -2,11 +2,11 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-exports.signup = (req, res, next) => {
+exports.signup = (req, res) => {
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
-                email : req.body.email, 
+                email : req.body.email.toLowerCase().trim().toString(), 
                 password : hash
             });
             user.save()
@@ -23,7 +23,9 @@ exports.getAllUsers = (req,res) => {
 }
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
+    const email = req.body.email.toLowerCase().trim().toString();
+    const password = req.body.password;
     if (!email || !password) return res.status(400).json({ 'message': 'Username and password are required.' });
 
     const foundUser = await User.findOne({ email: email }).exec();
