@@ -51,8 +51,8 @@ export default function Form({ url, title, formArr, submitBtn, errorMessage, for
         if (Object.keys(formErrors).length === 0 && isSubmit) {
             axios.post(url, {...form})
             .then(res => {
-                console.log(JSON.stringify(res));
-                console.log(res.data.token);
+                // console.log(JSON.stringify(res));
+                // console.log(res.data.token);
                 if(formLogin){ setAuth({...form, token : res.data.token});};
                 setForm(initialForm);
                 navigate(from, { replace: true});

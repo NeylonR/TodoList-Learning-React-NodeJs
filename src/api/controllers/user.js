@@ -10,17 +10,11 @@ exports.signup = (req, res) => {
                 password : hash
             });
             user.save()
-                .then(() => res.status(201).json({ message: 'Utilisateur créé.'}))
+                .then(() => res.status(201).json({ message: 'User created.'}))
                 .catch(error => res.status(400).json({ error, message : 'Mail already used.' }));
         })
         .catch(error => res.status(500).json({ error }));
 };
-
-exports.getAllUsers = (req,res) => {
-    User.find()
-    .then(users => res.status(201).json(users))
-    .catch(error => res.status(400).json({error}));
-}
 
 exports.login = async (req, res) => {
     // const { email, password } = req.body;

@@ -55,9 +55,13 @@ export default function Home() {
     };
 
     return (
-        <div>
-            <h1>Home</h1>
-            {auth?.email && <Button onClick={createNewList}>Create</Button>}
+        <section>
+            {auth?.email && 
+            <>
+                <h1>My lists</h1>
+                <Button onClick={createNewList}>New List</Button>
+            </>
+            }
             {auth?.email ? (
                 <TodoDiv>
                     {isLoading ? (
@@ -75,6 +79,6 @@ export default function Home() {
             ) : (
                 <p>You have to be connected to your <Link to='/login'>account</Link> to be able to create and see your list.</p>
             )}
-        </div>
+        </section>
     );
 };
