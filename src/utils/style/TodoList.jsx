@@ -1,6 +1,82 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { flex } from './mixins';
 import colors from './colors';
+
+const validBorder = keyframes`{
+    0% {
+        width: 0;
+        height: 0;
+        opacity:0;
+    }
+    50% {
+        width: 50%;
+        height:0%;
+    }
+    100% {
+        width: 50%;
+        height: 100%;
+    }
+}`;
+const validBorderTop = keyframes`{
+    0% {
+        width: 0px;
+    }
+    50% {
+        width: 0px;
+    }
+    100% {
+        width: 50%
+    }
+}`;
+const validArticle = keyframes`{
+    0% {
+        transform: translate(0,0);
+    }
+    50%{
+        transform: translate(0,0);
+    }
+    70%{
+        transform: translateY(-7px);
+    }
+    80%{
+        transform: translateY(0px);
+    }
+    90%{
+        transform: translateY(-7px);
+    }
+    100%{
+        transform: translate(0,0);
+    }
+    
+}`;
+
+export const TopArticle = styled.span`
+    position: absolute;
+    top:0;
+    width:100%;
+    height:10px;
+    &:before, &:after{
+        position: absolute;
+        top:0px;
+        content: '';
+        height: 100%;
+        width: 0;
+        display: block;
+        opacity: 0;
+        border-top: solid 3px green;
+        border-left: solid 0 transparent;
+        border-right: solid 0 transparent;
+        z-index:1;
+    }
+    &:before {
+        border-top-right-radius:7px;
+        right: 0%;
+    }
+    &:after {
+        border-top-left-radius:7px;
+        left: 0%;
+    }
+`;
 
 export const TodoListArticle = styled.article`
     position: relative;
@@ -32,6 +108,39 @@ export const TodoListArticle = styled.article`
         position: absolute;
         top: 1em;
         right: 1em;
+    }
+    &.validating:before, &.validating:after{
+        z-index:3;
+        opacity: 1;
+        position: absolute;
+        bottom:-3px;
+        content: '';
+        height: 0;
+        width: 0;
+        border-bottom: solid 3px green;
+        border-radius:7px;
+    }
+    &.validating:before, &.validating:after {
+        animation: ${validBorder} forwards 1s;
+        animation-timing-function: cubic-bezier(0.39, 0.575, 0.565, 1);
+        border-bottom: solid 3px green;
+    }
+    &.validating:before{
+        left:50%;
+        border-right: solid 3px green;
+        border-bottom-left-radius:7px;
+    }
+    &.validating:after{
+        right:50%;
+        border-left: solid 3px green;
+        border-bottom-right-radius:7px;
+    }
+    &.validating ${TopArticle}:before, &.validating ${TopArticle}:after {
+        opacity: 1;
+        animation: ${validBorderTop} ease-in-out forwards 2s;
+    }
+    &.validating {
+        animation: ${validArticle} ease-in-out forwards 2s;
     }
 `;
 
@@ -106,6 +215,7 @@ export const TodoInput = styled.input`
 
 export const SaveButton = styled.button`
     position: absolute;
+    z-index:6;
     bottom: 0;
     left: 50%;
     transform: translate(-50%, 50%);

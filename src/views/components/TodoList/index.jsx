@@ -1,4 +1,4 @@
-import { TodoListArticle, TodoInput, TodoForm, SaveButton } from "../../../utils/style/TodoList";
+import { TodoListArticle, TodoInput, TodoForm, SaveButton, TopArticle } from "../../../utils/style/TodoList";
 import { Button } from "../../../utils/style/GlobalStyle";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -18,6 +18,7 @@ export default function TodoList({userList, deleteTodoList}) {
     const [errored, setErrored] = useState("");
     const [isListValid, setIsListValid] = useState(true);
     const [allowNewTask, setAllowNewTask] = useState(true);
+    const [animateValidation, setAnimateValidation] = useState(false);
 
     // console.log(...listValues.task)
     const hasOneEmptyText = listValues.task.map((task) => (
@@ -96,6 +97,7 @@ export default function TodoList({userList, deleteTodoList}) {
     const saveList = async() => {
         try {
             await axios.put(`http://localhost:4200/api/todolist/${listValues._id}`, {...listValues}, { headers:{"Authorization" : `Bearer ${auth.token}`}})
+            setAnimateValidation(true);
             setErrored('');
             setIsListValid(false);
         } catch (error) {
@@ -105,7 +107,7 @@ export default function TodoList({userList, deleteTodoList}) {
     };
 
     return (
-        <TodoListArticle onSubmit={(e)=>e.preventDefault()}>
+        <TodoListArticle onSubmit={(e)=>e.preventDefault()} className={animateValidation && "validating"}>
             {errored.length > 1 && <p>{errored}</p>}
             <FontAwesomeIcon title="Delete the list" className="deleteList" icon="trash" onClick={deleteTodoList}/>
             {!listValues?.title || titleIsModify ? (
@@ -176,6 +178,7 @@ export default function TodoList({userList, deleteTodoList}) {
             
             <Button onClick={addInputOnClick} disabled={!allowNewTask}>Add a task</Button>
             <SaveButton onClick={saveList} disabled={!isListValid}>Save</SaveButton>
+            <TopArticle onAnimationEnd={()=>setAnimateValidation(false)}/> {/* used for animation */}
         </TodoListArticle>
     )
 }
