@@ -20,17 +20,18 @@ export default function TodoList({userList, deleteTodoList}) {
     const [allowNewTask, setAllowNewTask] = useState(true);
     const [animateValidation, setAnimateValidation] = useState(false);
 
-    // console.log(...listValues.task)
+    // return true if one of the task is an empty string
     const hasOneEmptyText = listValues.task.map((task) => (
         task?.text?.toString().trim().length <= 0 ? true : task
     ));
 
     useEffect(()=>{
+        // handle isListValue for the display
         const isValid = () => {
             if(hasOneEmptyText.includes(true) || listValues.title.length < 4 || listValues.title.length > 40) return setIsListValid(false);
             return setIsListValid(true);
         };
-
+        // if one task is being modified/empty user won't be able to modify another task of the list
         const newTaskIsAllowed = () => {
             const isAnyTaskModify = listValues.task.map((task) => {
                 if(task.modify === true) return true;
@@ -58,8 +59,8 @@ export default function TodoList({userList, deleteTodoList}) {
             task.id === taskId ? { ...task, text: e.target.value, isNew: false } : task
         )})
     };
-    
-    const addInputOnClick = () => {
+
+    const addTaskOnClick = () => {
         setListValues(
             {...listValues, 
             task : [
@@ -69,7 +70,7 @@ export default function TodoList({userList, deleteTodoList}) {
         })
     };
 
-    const deleteInputOnClick = (taskId) => {
+    const deleteTaskOnClick = (taskId) => {
         const filteredList = listValues.task.filter(task => task.id !== taskId);
         setListValues({...listValues, task : [...filteredList]});
     };
@@ -93,7 +94,7 @@ export default function TodoList({userList, deleteTodoList}) {
 
         setListValues({...listValues, task : [...taskModifyState]});   
     };
-
+    // PUT the actual list 
     const saveList = async() => {
         try {
             await axios.put(`http://localhost:4200/api/todolist/${listValues._id}`, {...listValues}, { headers:{"Authorization" : `Bearer ${auth.token}`}})
@@ -169,14 +170,14 @@ export default function TodoList({userList, deleteTodoList}) {
                             <div>
                                 <FontAwesomeIcon icon="wrench" onClick={()=>modifyInputOnClick(task.id)}/>
                                 <FontAwesomeIcon icon="check" onClick={()=>taskIsDoneOnClick(task.id)}/>
-                                <FontAwesomeIcon title="Delete the task" icon="trash" onClick={()=>deleteInputOnClick(task.id)}/>
+                                <FontAwesomeIcon title="Delete the task" icon="trash" onClick={()=>deleteTaskOnClick(task.id)}/>
                             </div>
                         </TodoForm>
                     )
                 })
             )}
             
-            <Button onClick={addInputOnClick} disabled={!allowNewTask}>Add a task</Button>
+            <Button onClick={addTaskOnClick} disabled={!allowNewTask}>Add a task</Button>
             <SaveButton onClick={saveList} disabled={!isListValid}>Save</SaveButton>
             <TopArticle onAnimationEnd={()=>setAnimateValidation(false)}/> {/* used for animation */}
         </TodoListArticle>

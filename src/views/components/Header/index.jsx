@@ -9,7 +9,7 @@ export default function Header() {
     const logout = async() => {
         setAuth({});
         navigate('/');
-    }
+    };
     return (
         <HeaderStyle>
             <nav>
@@ -21,7 +21,7 @@ export default function Header() {
                         <li><Link to={'/login'}>Login</Link></li>
                     </> ) : (
                         <>
-                        <li><Link to={'/profile'}>Profile</Link></li>
+                        {/* <li><Link to={'/profile'}>Profile</Link></li> */}
                         <li><button onClick={logout}>Logout</button></li>
                         </>
                     )}

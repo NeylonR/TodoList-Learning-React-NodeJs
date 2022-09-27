@@ -10,9 +10,9 @@ export default function Home() {
     const { auth } = useAuth();
     const [todoList, setTodoList] = useState();
     const [isLoading, setIsLoading] = useState(true);
-
+    // GET to retrieve the user's lists
     useEffect(() => {
-        setIsLoading(true)
+        setIsLoading(true);
         const getUsers = async () => {
             try {
             const response = await axios.get(
@@ -29,21 +29,17 @@ export default function Home() {
         }
         if(auth?.token) getUsers();
     }, [auth]);
-
+    // POST to create a new list
     const createNewList = async() => {
-        const emptyList = { 
-            title: "New list",
-            task:[]
-        };
         try {
-            const response = await axios.post(`http://localhost:4200/api/todolist`, emptyList, { headers:{"Authorization" : `Bearer ${auth.token}`}});
+            const response = await axios.post(`http://localhost:4200/api/todolist`, {}, { headers:{"Authorization" : `Bearer ${auth.token}`}});
             const newList = response.data;
             setTodoList([...todoList, newList]);
         } catch (error) {
             console.error(error);
         }
     };
-
+    // DELETE the list
     const deleteList = async(id) => {
         try {
             await axios.delete(`http://localhost:4200/api/todolist/${id}`, { headers:{"Authorization" : `Bearer ${auth.token}`}});
@@ -56,16 +52,13 @@ export default function Home() {
 
     return (
         <section>
-            {auth?.email && 
+            {auth?.email ? ( 
             <>
                 <h1>My lists</h1>
                 <Button onClick={createNewList}>New List</Button>
-            </>
-            }
-            {auth?.email ? (
                 <TodoDiv>
                     {isLoading ? (
-                        <TodoList/>
+                        <p>Loading</p>
                         ) : (
                         todoList.map((list) => {
                             return <TodoList 
@@ -76,6 +69,7 @@ export default function Home() {
                         })
                     ) }
                 </TodoDiv>
+            </>
             ) : (
                 <p>You have to be connected to your <Link to='/login'>account</Link> to be able to create and see your list.</p>
             )}

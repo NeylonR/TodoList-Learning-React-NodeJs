@@ -139,9 +139,9 @@ export const TodoListArticle = styled.article`
         opacity: 1;
         animation: ${validBorderTop} ease-in-out forwards 2s;
     }
-    &.validating {
-        animation: ${validArticle} ease-in-out forwards 2s;
-    }
+    // &.validating {
+    //     animation: ${validArticle} ease-in-out forwards 2s;
+    // }
 `;
 
 export const TodoForm = styled.form`

@@ -24,7 +24,7 @@ export default function Form({ url, title, formArr, submitBtn, errorMessage, for
 
     //desctructure previous state and use it to change the correct key of the form with the actual input's value
     const onChangeHandler = (e) => setForm((prevState) => ({ ...prevState, [e.target.name]: e.target.value}));
-
+    // some validation + errors
     const validate = (values) => {
         const errors = {};
         const regexEmail = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -46,7 +46,7 @@ export default function Form({ url, title, formArr, submitBtn, errorMessage, for
         setFormErrors(validate(form));
         setIsSubmit(true);
     };
-
+    // POST to create an account or login, according to the props 
     useEffect(() => {
         if (Object.keys(formErrors).length === 0 && isSubmit) {
             axios.post(url, {...form})

@@ -2,7 +2,6 @@ const Todolist = require('../models/TodoList');
 
 exports.editList = (req, res) => {
     delete req.body._id;
-    // console.log(req.body)
     const titleLength = req.body.title.length;
     if(titleLength < 4 || titleLength > 40) return res.status(400).json({message: 'Title has to contains between 4 and 40 characters.'})
     Todolist.findOne({ _id: req.params.id})
@@ -16,10 +15,9 @@ exports.editList = (req, res) => {
 
 exports.createList = (req, res) => {
     const todoList = new Todolist({
-        ...req.body,
         creator_id: req.auth.userId,
-        title: req.body.title.trim().toString(),
-        task: [...req.body.task]
+        title: `New list`, /*req.body.title.trim().toString()*/
+        task: []
     });
     todoList.save()
     .then(todoList => res.status(200).json(todoList))
