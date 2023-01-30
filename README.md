@@ -1,6 +1,6 @@
 Création d'une Todolist avec ReactJS pour le front, et NodeJS pour l'api REST ( situé dans src>api ), design très basique.
 
-[app.js](https://github.com/NeylonR/TodoList-Learning-React-NodeJs/blob/master/src/api/App.js) modifier la ligne 9 pour y mettre les informations votre base de donnée mongodb si les identifiants et la db ne sont plus accepté.
+[app.js](https://github.com/NeylonR/TodoList-Learning-React-NodeJs/blob/master/src/api/App.js) modifier la ligne 9 pour y mettre les informations de votre base de données mongodb si les identifiants et la db ne sont plus acceptés.
 ### `npm start` pour le front
 ### `nodemon` pour l'api
 
